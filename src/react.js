@@ -33,10 +33,12 @@ function makeProps(props, children) {
 }
 
 function useState(initValue) {
+  // 함수 컴포넌트가 호출될 때에 current를 +1 해주었기 때문에
+  // 그 호출한 컴포넌트에서 hook을 호출했다면 index가 같아야 되니까 -1을 해줘야된다.
   let position = currentComponent - 1;
 
   if (!hooks[position]) {
-    hooks[position] = iniValue;
+    hooks[position] = initValue;
   }
 
   const modifier = nextValue => {
@@ -57,6 +59,8 @@ export function createElement(tag, props = {}, ...children) {
       return instance.render();
     }
 
+    // 함수 컴포넌트를 호출할 때 index라고 하는 위치값 기반의 외부 상태 (hooks 배열)에 값을 저장해놓고
+    // 그 함수가 상태를 저장하는(유지하는) 것처럼 효과를 낼 수 있는 마법같은 기능을 react가 제공하는 것이다.
     hooks[currentComponent] = null;
     currentComponent++;
 

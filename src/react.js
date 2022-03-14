@@ -34,22 +34,33 @@ export function createElement(tag, props = {}, ...children) {
 
   if (typeof tag === 'function') {
     // typeof는 class와 function을 구분하지 못하고 function으로 받아들이기 때문에
-    // instanceof Component를 활용해서 확인한다.
+    // prototype instanceof Component를 활용해서 확인한다.
     if (tag.prototype instanceof Component) {
       const instance = new tag(makeProps(props, children));
       return instance.render();
-    } else {
-      if (children.length > 0) {
-        return tag(makeProps(props, children));
-      } else {
-        return tag(props);
-      }
     }
-  } else {
-    return { tag, props, children };
+
+    if (children.length > 0) {
+      return tag(makeProps(props, children));
+    } else {
+      return tag(props);
+    }
   }
+
+  return { tag, props, children };
 }
 
-export function render(vdom, container) {
-  container.appendChild(createDOM(vdom));
-}
+export const render = (function () {
+  let prevDom = null;
+
+  return function (vdom, container) {
+    if (prevDom === null) {
+      prevDom = vdom;
+    }
+
+    // diff -> 기존의 돔과 vdom과 객체 수준의 비교를 해서 변경 사항만 업데이트 된 새로운 객체를 만들고
+    // 변경 사항 부분만 real dom에 업데이트 한다.
+
+    container.appendChild(createDOM(vdom));
+  };
+})();

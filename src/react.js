@@ -1,3 +1,9 @@
+export class Component {
+  constructor(props) {
+    this.props = props;
+  }
+}
+
 export function createDOM(node) {
   if (typeof node === 'string') {
     return document.createTextNode(node);
@@ -16,17 +22,28 @@ export function createDOM(node) {
   return element;
 }
 
+function makeProps(props, children) {
+  return {
+    ...props,
+    children: children.length === 1 ? children[0] : children,
+  };
+}
+
 export function createElement(tag, props = {}, ...children) {
   props = props || {};
 
   if (typeof tag === 'function') {
-    if (children.length > 0) {
-      return tag({
-        ...props,
-        children: children.length === 1 ? children[0] : children,
-      });
+    // typeof는 class와 function을 구분하지 못하고 function으로 받아들이기 때문에
+    // instanceof Component를 활용해서 확인한다.
+    if (tag.prototype instanceof Component) {
+      const instance = new tag(makeProps(props, children));
+      return instance.render();
     } else {
-      return tag(props);
+      if (children.length > 0) {
+        return tag(makeProps(props, children));
+      } else {
+        return tag(props);
+      }
     }
   } else {
     return { tag, props, children };

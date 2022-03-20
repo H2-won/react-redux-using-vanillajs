@@ -1,15 +1,30 @@
-import * as ActionType from './action-type.js';
+import * as Actions from './action-type.js';
 
-const InitializeState = { count: 0 };
+const InitializeState = { message: 'app sotre' };
 
-export function reducer(state = InitializeState, action) {
+export default function reducer(state = InitializeState, action) {
   switch (action.type) {
-    case ActionType.INCREASE:
-      return { ...state, count: state.count + 1 };
-    case ActionType.DECREASE:
-      return { ...state, count: state.count - 1 };
-    case ActionType.RESET:
-      return { ...state, count: 0 };
+    case Actions.INCREASE_COUNTER:
+      return {
+        ...state,
+        counter: state.counter === undefined ? 0 : state.counter + 1,
+      };
+    case Actions.ASYNC_INCREASE_COUNTER:
+      fetch(action.payload.url)
+        .then(res => res.json())
+        .then(result => {
+          return { ...state };
+        })
+        .catch(err => {
+          return { ...state };
+        });
+    case Actions.DECREASE_COUNTER:
+      return {
+        ...state,
+        counter: state.counter === undefined ? 0 : state.counter - 1,
+      };
+    case Actions.SET_COUNTER:
+      return { ...state, counter: action.payload };
     default:
       return { ...state };
   }
